@@ -3,6 +3,7 @@
 审计执行：Muse（云端）只读审计。审计时间：2026-11-02 04:40–05:10（北京时间）；复核：2026-11-02 上午二次复核，基线未变——本仓 main 头 SHA（15762cbd…）与 registry blob SHA（8fb018dc…）与凌晨审计一致，云端 cron 清单仍为在册 19 个（18 启用、1 暂停）；ChatGPT 总监控已于当日创建（每日 08:30、周日深度复盘）。
 验收口径：以运行日志、配置与实际产物为准；云端无法直接核实的本地运行时事项一律标「待验证」，不以任何 Agent 自述为准。
 脱敏口径：本文不含原始会话、密钥、私人绝对路径与内部项目代号；任务只记名称、排期、状态与产物落点类别。
+修正记录：2026-11-02 ChatGPT 独立审核（针对提交 abd8adc）提出四项修正——关键结论补可追溯证据、成功状态按证据强度分级、冲突逐项补 evidence_ref、告警规则与文档链接统一；本版已逐项修正，运行状态口径以本版四级为准。
 
 ## 一、审计范围与证据来源
 
@@ -75,25 +76,41 @@
 
 ## 附、统一执行状态摘要（脱敏，供远端监控直接读取）
 
-字段口径：task_id、owner、schedule、timezone、last_run、status、artifact_path、artifact_updated_at、commit_sha、error_code。status 三分：success（有运行或产物证据）/ artifact_stale（任务在跑但产物未更新）/ 待验证（证据缺失，不判定失败）。未取得的字段填「待验证」，不猜测。产物路径只记类别，不含私人绝对路径。
+字段口径：task_id、owner、schedule、timezone、last_run、status、artifact_path、artifact_updated_at、commit_sha、error_code，证据定位见表后 evidence_ref 索引。status 按证据强度四级：run_success（有对应运行成功记录）/ artifact_observed（仅看到产物变化，无运行记录直证）/ artifact_stale（预期产物过期）/ unverified（证据不足，不判定失败）。commit_sha 只填 Git 提交 SHA；文件 blob SHA 是内容指纹，单独标注、不得混填。未取得的字段填「待验证」，不猜测。产物路径只记相对路径类别，不含私人绝对路径。
 
 | task_id | owner | schedule | timezone | last_run | status | artifact_path | artifact_updated_at | commit_sha | error_code |
 |---|---|---|---|---|---|---|---|---|---|
-| daily-trend-scan | 本地平台 | 每日 09:00 | Asia/Shanghai | 2026-11-01 | success | 私有仓产出/舆情日报 | 2026-11-01 | 待验证 | — |
-| mp-data-review-daily | 本地平台 | 每日 09:40 | Asia/Shanghai | 2026-11-02 | success | 私有仓产出/数据复盘报告 | 2026-11-02 | 待验证 | — |
-| free-compute-daily | 本地平台 | 每日 09:00 | Asia/Shanghai | 2026-11-01 | success | 私有仓产出/免费算力日刊 | 2026-11-01 | 待验证 | — |
-| wechat-tuitu-daily | 本地平台 | 每日 10:00 | Asia/Shanghai | 待验证 | success（间接证据：卡片编号持续增长） | 私有仓产出/贴图卡片 | 待验证 | 待验证 | — |
-| daily-publish-flywheel | 本地平台 | 每日 19:00 | Asia/Shanghai | 2026-11-02 | success | 私有仓产出/飞轮周报与运行日志 | 2026-11-02 | 待验证 | — |
-| opensource-matrix-weekly | 本地平台 | 登记每周三 21:00（实际日更） | Asia/Shanghai | 2026-11-01 | success | 私有仓产出/开源矩阵巡检 | 2026-11-01 | 待验证 | SCHEDULE_DRIFT |
-| ops-feed-daily-push | 本地平台 | 每日 23:30 | Asia/Shanghai | 2026-11-02 00:32 | success | 私有仓产出/manifest.json | 2026-11-02 00:32 | f234e6bc（manifest blob 短 SHA） | — |
+| daily-trend-scan | 本地平台 | 每日 09:00 | Asia/Shanghai | 2026-11-01 | artifact_observed | 私有仓产出/舆情日报 | 2026-11-01 | 待验证 | — |
+| mp-data-review-daily | 本地平台 | 每日 09:40 | Asia/Shanghai | 2026-11-02 | artifact_observed | 私有仓产出/数据复盘报告 | 2026-11-02 | 待验证 | — |
+| free-compute-daily | 本地平台 | 每日 09:00 | Asia/Shanghai | 2026-11-01 | artifact_observed | 私有仓产出/免费算力日刊 | 2026-11-01 | 待验证 | — |
+| wechat-tuitu-daily | 本地平台 | 每日 10:00 | Asia/Shanghai | 待验证 | artifact_observed（仅产物变化，无运行记录直证） | 私有仓产出/贴图卡片 | 待验证 | 待验证 | — |
+| daily-publish-flywheel | 本地平台 | 每日 19:00 | Asia/Shanghai | 2026-11-02 | artifact_observed | 私有仓产出/飞轮周报与运行日志 | 2026-11-02 | 待验证 | — |
+| opensource-matrix-weekly | 本地平台 | 登记每周三 21:00（实际日更） | Asia/Shanghai | 2026-11-01 | artifact_observed | 私有仓产出/开源矩阵巡检 | 2026-11-01 | 待验证 | SCHEDULE_DRIFT |
+| ops-feed-daily-push | 本地平台 | 每日 23:30 | Asia/Shanghai | 2026-11-02 00:32 | artifact_observed | 私有仓产出/manifest.json | 2026-11-02 00:32 | 待验证（Git 提交 SHA 未取得） | — |
 | stats-snapshot-export（复盘子环节，非独立登记条目） | 本地平台 | 每日（随复盘与推送链） | Asia/Shanghai | 2026-10-30 | artifact_stale | 私有仓产出/stats | 2026-10-30 | 待验证 | ARTIFACT_STALE |
-| skill-library-weekly-checkup | 本地平台 | 每周一 09:40 | Asia/Shanghai | 2026-10-25 | 待验证（疑缺一期） | 私有仓产出/技能库体检 | 2026-10-25 | 待验证 | ARTIFACT_MISSING_UNVERIFIED |
-| daily-io-briefing | Muse 云端 | 每日 07:00 | Asia/Shanghai | 2026-11-02 | success | 主聊交付与当日日志 | 2026-11-02 | — | — |
-| daily-trend-digest | Muse 云端 | 每日 07:30 | Asia/Shanghai | 2026-11-02 | success | 主聊交付与底稿 | 2026-11-02 | — | — |
-| xingtu-podcast-daily | Muse 云端 | 每日约 08:17 | Asia/Shanghai | 2026-11-02 | success（第 18 集完结已核验） | 私有播客存档 ep-018 | 2026-11-02 | — | — |
-| github-daily-watch | Muse 云端 | 每日约 09:17 | Asia/Shanghai | 待验证（2026-11-02 首跑结果待回） | 待验证 | 本地巡检日志目录 | 待验证 | 待验证 | — |
-| github-backlog-watch | Muse 云端 | 每周一约 09:17 | Asia/Shanghai | 待验证（2026-11-02 首跑结果待回） | 待验证 | GitHub 维护目标基线目录 | 待验证 | 待验证 | — |
-| chatgpt-monitor | ChatGPT | 每日 08:30、周日深度复盘 | Asia/Shanghai | 待验证（2026-11-02 已创建，首跑待回） | 待验证 | ChatGPT 侧通知 | — | — | — |
+| skill-library-weekly-checkup | 本地平台 | 每周一 09:40 | Asia/Shanghai | 2026-10-25 | unverified（疑缺一期） | 私有仓产出/技能库体检 | 2026-10-25 | 待验证 | ARTIFACT_MISSING_UNVERIFIED |
+| daily-io-briefing | Muse 云端 | 每日 07:00 | Asia/Shanghai | 2026-11-02 | run_success | 主聊交付与当日日志 | 2026-11-02 | — | — |
+| daily-trend-digest | Muse 云端 | 每日 07:30 | Asia/Shanghai | 2026-11-02 | run_success | 主聊交付与底稿 | 2026-11-02 | — | — |
+| xingtu-podcast-daily | Muse 云端 | 每日约 08:17 | Asia/Shanghai | 2026-11-02 | run_success（第 18 集完结已核验） | 私有播客存档 ep-018 | 2026-11-02 | — | — |
+| github-daily-watch | Muse 云端 | 每日约 09:17 | Asia/Shanghai | 待验证（2026-11-02 首跑结果待回） | unverified（首跑结果待回） | 本地巡检日志目录 | 待验证 | 待验证 | — |
+| github-backlog-watch | Muse 云端 | 每周一约 09:17 | Asia/Shanghai | 待验证（2026-11-02 首跑结果待回） | unverified（首跑结果待回） | GitHub 维护目标基线目录 | 待验证 | 待验证 | — |
+| chatgpt-monitor | ChatGPT | 每日 08:30、周日深度复盘 | Asia/Shanghai | 待验证（2026-11-02 已创建，首跑待回） | unverified（已创建，首跑待回） | ChatGPT 侧通知 | — | — | — |
+
+### evidence_ref 索引（2026-11-02 审核修正补）
+
+相对路径以私有仓 xingtu-vault 为根，产出目录为「03_运营工具箱 (Operations Toolkit)/定时任务产出/」。证据锚点：manifest.json 固定提交链接 https://github.com/xingtu1996/xingtu-vault/blob/94b81baf3269b943007177df70c6750b73cba063/03_%E8%BF%90%E8%90%A5%E5%B7%A5%E5%85%B7%E7%AE%B1%20(Operations%20Toolkit)/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E4%BA%A7%E5%87%BA/manifest.json（blob SHA f234e6bc…，updated_at 2026-11-02 00:32:51）；产出目录 https://github.com/xingtu1996/xingtu-vault/tree/94b81baf3269b943007177df70c6750b73cba063/03_%E8%BF%90%E8%90%A5%E5%B7%A5%E5%85%B7%E7%AE%B1%20(Operations%20Toolkit)/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E4%BA%A7%E5%87%BA ；登记文件固定链接 https://github.com/xingtu1996/xingtu-scheduled/blob/15762cbdbb8d986375443cc79b6238596cb0ab40/registry/AUTOMATIONS.yaml（blob SHA 8fb018dc…）。
+
+- daily-trend-scan：产出/舆情日报，最新文件日期 2026-11-01，经 manifest 索引核对。
+- mp-data-review-daily：产出/数据复盘报告，最新文件日期 2026-11-02。
+- free-compute-daily：产出/免费算力日刊，最新文件日期 2026-11-01。
+- wechat-tuitu-daily：产出/贴图卡片，编号持续增长至 034（截至 2026-11-02），仅产物变化证据，无运行记录直证。
+- daily-publish-flywheel：产出/飞轮周报与运行日志，最新文件日期 2026-11-02。
+- opensource-matrix-weekly：产出/开源矩阵巡检，文件日期连续至 2026-11-01，与登记周排期不符（见冲突矩阵 C-05）。
+- ops-feed-daily-push：产出/manifest.json，updated_at 2026-11-02 00:32:51；其 blob SHA f234e6bc… 为文件内容指纹，不是 Git 提交 SHA，故 commit_sha 字段不填此值。
+- stats-snapshot-export：产出/stats/，最新 stats_2026-10-30.json；与 manifest updated_at 对照得出断档结论（见 C-06）。
+- skill-library-weekly-checkup：产出/技能库体检，最新报告 2026-10-25。
+- 云端三条 run_success（daily-io-briefing、daily-trend-digest、xingtu-podcast-daily）：证据为 Muse 云端调度器 2026-11-02 运行记录与交付核验（07:00 早报已交付、07:30 digest 已交付、08:17 播客第 18 集 isComplete 已核验）。此项为 Muse 已核验，ChatGPT 未独立复核。
+- github-daily-watch、github-backlog-watch、chatgpt-monitor：2026-11-02 新建或新创建，首跑结果待回，记 unverified。
 
 其余登记条目（会话采集、对话挖掘、素材刷新、变现飞轮、工具带盘点、会话归档、知识付费提醒、考研提醒、工作台同步、技能进化等）近 7 天逐项运行证据未取得，last_run 与 status 统一记「待验证」，见第三节。
 

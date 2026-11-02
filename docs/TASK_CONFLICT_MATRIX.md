@@ -15,6 +15,19 @@
 | C-09 | 状态错位 | 云端资讯总结：登记为 PAUSED（云端侧配置），但云端实际有同题 digest 每日在跑 | 登记条目状态；云端 cron 清单 | 按登记理解会误判该能力已停用 | 在登记中注明「能力由云端 digest 承接，本条目保留占位」，或直接删除该条目并入册云端任务 | 本地（登记修正） |
 | C-10 | 隐私风险（持续性） | 公开镜像同步流程：历史两轮隐私泛化修复（2026-10-20、2026-10-22）后仍含 prompt 全文结构 | 本仓提交历史 privacy 修复记录；registry 文件头红线 | 每次同步若漏脱敏，内部代号/路径可能再次进入公开仓 | 同步前固定跑一遍脱敏复扫（代号表 + 路径模式）并在 PR 描述中声明已复扫；公开镜像可考虑只保留条目元数据、prompt 全文只留私有真源 | 本地（同步方） |
 
+## 证据定位索引（evidence_ref，2026-11-02 审核修正补）
+
+- C-01：本仓 CHANGELOG（第 28 轮巡检记录）固定链接 https://github.com/xingtu1996/xingtu-scheduled/blob/15762cbdbb8d986375443cc79b6238596cb0ab40/CHANGELOG.md；云端 cron 清单（Muse 2026-11-02 核验，ChatGPT 未独立复核）；ChatGPT 监控创建事实由 boss 于 2026-11-02 转达确认。
+- C-02：登记条目 opensource-matrix-weekly（登记文件固定链接 https://github.com/xingtu1996/xingtu-scheduled/blob/15762cbdbb8d986375443cc79b6238596cb0ab40/registry/AUTOMATIONS.yaml）；私有仓产出/开源矩阵巡检日期序列至 2026-11-01（见盘点 evidence_ref 索引）；云端 wed-repo-traffic、repo-health-monthly、github-daily-watch 清单（Muse 核验）。
+- C-03：登记条目 daily-trend-scan（09:00，同上登记链接）；云端 daily-trend-digest（07:30）、t1-topic-harvest（21:00）运行记录（Muse 核验，2026-11-02 digest 已交付）。
+- C-04：登记条目 free-compute-daily；私有仓产出/免费算力日刊至 2026-11-01；云端 weekly-free-tier-watch 2026-11-02 08:00 运行记录（Muse 核验）。
+- C-05：登记文件固定链接（文件头 updated 2026-10-14，blob 8fb018dc…）；私有仓档案「03_运营工具箱 (Operations Toolkit)/定时任务档案/AUTOMATIONS.yaml」updated 2026-09-30（私有仓路径，Muse 核验）；开源矩阵产物连续日期序列（同 C-02）。
+- C-06：私有仓 manifest.json 固定提交链接 https://github.com/xingtu1996/xingtu-vault/blob/94b81baf3269b943007177df70c6750b73cba063/03_%E8%BF%90%E8%90%A5%E5%B7%A5%E5%85%B7%E7%AE%B1%20(Operations%20Toolkit)/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E4%BA%A7%E5%87%BA/manifest.json（updated_at 2026-11-02 00:32:51）与产出/stats/ 最新 stats_2026-10-30.json 的对照；同期数据复盘报告产出至 2026-11-02（见盘点索引）。
+- C-07：云端 cron 清单在册 19 条与 registry 22 条逐项对照（Muse 2026-11-02 核验，ChatGPT 未独立复核）；本仓治理巡检轮次记录（同 C-01 CHANGELOG 链接）；ChatGPT 监控已创建未登记（创建事实同 C-01）。
+- C-08：私有仓产出/技能库体检最新报告 2026-10-25（Muse 核验）；本地运行日志未取得，维持 unverified。
+- C-09：登记条目 cloud-ai-news-summary 状态 PAUSED（登记文件固定链接）；云端 daily-trend-digest 每日运行（Muse 核验）。
+- C-10：本仓提交历史 2026-10-20、2026-10-22 两轮 privacy 泛化修复记录（GitHub 提交列表可查）；xingtu-harness 根目录 2026-11-02 实查无 scheduled/automations 目录（Muse 核验）；本 PR 三份文档已经脱敏复核（PR #2 文件清单）。
+
 ## 处理优先级
 
 1. C-01 监控分工收敛（先定主执行者，再上线任何新监控）。

@@ -42,7 +42,7 @@
 | P2 黄 | 未归类产出持续增长；周更产物缺一期；同题双跑产物同日出现两份 | manifest 未归类一周净增 ≥10 项；技能库体检缺一期（待验证） |
 | 正常 | 产物按期、登记在保鲜期内、PR 积压可控 | 只记周报，不打扰 |
 
-告警只报事实与证据链接，不给执行指令；同一异常未恢复前不重复轰炸，每 24 小时最多复报一次且须标注「持续未恢复」。
+告警只报事实与证据链接，不给执行指令；正常时静默、不发送通知。相同异常不反复通知：仅当状态恶化、出现新证据或需要新的人工动作时才再次提醒。
 
 ## 五、避免与 Muse 重复执行
 
@@ -54,8 +54,9 @@
 
 - 登记中心：https://github.com/xingtu1996/xingtu-scheduled
 - 登记文件：https://github.com/xingtu1996/xingtu-scheduled/blob/main/registry/AUTOMATIONS.yaml
-- 本次盘点：https://github.com/xingtu1996/xingtu-scheduled/blob/main/docs/TASK_AUDIT_2026-11-02.md
-- 冲突矩阵：https://github.com/xingtu1996/xingtu-scheduled/blob/main/docs/TASK_CONFLICT_MATRIX.md
+- 本次盘点（固定提交链接，被审提交 abd8adc）：https://github.com/xingtu1996/xingtu-scheduled/blob/abd8adc9cfc0a731ff7e71cac1b5a5f0aad5dcdb/docs/TASK_AUDIT_2026-11-02.md
+- 冲突矩阵（固定提交链接，被审提交 abd8adc）：https://github.com/xingtu1996/xingtu-scheduled/blob/abd8adc9cfc0a731ff7e71cac1b5a5f0aad5dcdb/docs/TASK_CONFLICT_MATRIX.md
+- 审计 PR：https://github.com/xingtu1996/xingtu-scheduled/pull/2（合并后上述文档链接以 main 为准，由合并 PR 同步更新）
 - 私有产出仓（需仓库权限）：https://github.com/xingtu1996/xingtu-vault ，路径「03_运营工具箱 (Operations Toolkit)/定时任务产出/」下 manifest.json 与 stats/
 - 内容与案例集仓：https://github.com/xingtu1996/xingtu-articles
 
@@ -73,8 +74,8 @@
 3. 全部相关仓库的 open PR：总数与最老 Draft 的积压天数；积压超 7 天且总数不少于 5 记 P1，逐个列出标题与链接。
 4. 公开仓抽查：若发现未脱敏的内部代号、私人路径或密钥样字符串出现在公开仓文件中，立即记 P0 并附文件链接（只引用位置，不复制敏感原文）。
 
-输出：一份简短监控报告，含核查时间（北京时间）、每项结论（正常/异常级别）、异常的证据链接。全部正常时只输出一行「全部正常」加核查时间。
+输出：一份简短监控报告，含核查时间（北京时间）、每项结论（正常/异常级别）、异常的证据链接。全部正常时不发送任何通知（静默），仅在周日深度复盘中汇总一行。
 禁止：修改、暂停、删除任何定时任务；合并、关闭或评论 PR；写入任何仓库；生成公众号草稿或发布内容；与 Muse 的巡检任务重复生成同类报告文件——你只做第三方复核与告警。
-同一异常未恢复时，24 小时内不重复告警；超过 24 小时未恢复可复报一次并标注「持续未恢复」。
+相同异常不重复告警：仅当状态恶化、出现新证据或需要新的人工动作时才再次提醒。
 无法访问或无法核实的项目，明确写「待验证」及原因，不猜测、不编造。
 ```
