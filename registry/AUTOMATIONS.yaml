@@ -31,7 +31,7 @@
 # ============================================================
 
 schema_version: 1
-updated: "2026-11-08"
+updated: "2026-11-05"
 workspace_root: <WORKSPACE_ROOT>
 timezone: Asia/Shanghai
 platform_of_record: WorkBuddy (automation_update)
