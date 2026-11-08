@@ -31,7 +31,7 @@
 # ============================================================
 
 schema_version: 1
-updated: "2026-11-02"
+updated: "2026-11-08"
 workspace_root: <WORKSPACE_ROOT>
 timezone: Asia/Shanghai
 platform_of_record: WorkBuddy (automation_update)
@@ -617,8 +617,25 @@ automations:
     cwd:
       - <WORKSPACE_ROOT>
     purpose: 定时抓取转发给元宝的新内容 → 解析原稿 → 蒸馏提炼 → 入库素材库，供内容创作取用。
+    execution:
+      mode: split            # 双阶段：本地采集 / 处理可上云（2026-11-05 定）
+      stage1:
+        name: 本地采集（解密微信库 + 提取元宝卡片）
+        env: local-required   # 依赖微信客户端库与 keys.json，永不上云
+        entry: <WORKSPACE_ROOT>/github/xingtu-tools/yuanbao-pipeline/stage1_local_collect.sh
+        output: <WORKSPACE_ROOT>/outputs/yuanbao_inventory/yuanbao_cards.json
+      stage2:
+        name: 增量抓全文 + vault 同步 + 归档
+        env: cloud-capable    # 只需 cards.json + vault 仓 + 出网
+        entry: <WORKSPACE_ROOT>/github/xingtu-tools/yuanbao-pipeline/stage2_cloud_process.sh
+      contract: yuanbao_cards.json（唯一跨环境契约）
     artifacts:
-      - <WORKSPACE_ROOT>/素材库/（增量卡片）
+      - <WORKSPACE_ROOT>/github/xingtu-vault/12_工具研究室/yuanbao_inventory/.yuanbao_watermark.json
+      - <WORKSPACE_ROOT>/github/xingtu-vault/12_工具研究室/yuanbao_inventory/增量批次/<YYYY-MM-DD>/
+      - <WORKSPACE_ROOT>/github/xingtu-vault/12_工具研究室/yuanbao_inventory/元宝全文抓取/
+      - <WORKSPACE_ROOT>/github/xingtu-vault/12_工具研究室/yuanbao_inventory/反哺简报/
+      - <WORKSPACE_ROOT>/github/xingtu-vault/02_内容仓库 (Content Hub)/06_元宝对话挖掘/
+      - <WORKSPACE_ROOT>/素材库/（增量卡片 + 素材库索引）
     note: 完整 spec（prompt 全文）在私有 registry .harness/scheduled/yuanbao-archive/spec.md
 
   - slug: session-archive
@@ -780,7 +797,6 @@ automations:
       【规模告警】语料文件 <100 或 >2000、prompt <500、禁词剔除率 >30% → 置顶加粗告警。
       【隐私铁律 SAF-010】脚本内置白名单只扫 xingtu 会话源；禁止把雇主项目（内部代号类）会话内容写进任何产出；报告样本仅限脚本脱敏后的内容。
       【禁止动作】不自动创建/删除任何 skill（三张清单只供 boss 拍板）；不 push 任何公开仓。
-
 
 # ============================================================
 # 平台段补登（2026-11-02 同步 · 详见 docs/REGISTRY_SYNC_2026-11-02.md）
