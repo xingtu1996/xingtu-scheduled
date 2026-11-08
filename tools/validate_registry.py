@@ -44,8 +44,9 @@ def validate(path: Path) -> list[str]:
             errors.append("local task must be mapping")
             continue
         schedule = task.get("schedule")
-        if not isinstance(schedule, dict) or not schedule.get("cron"):
-            errors.append(f"missing schedule for {task.get('slug', '<unknown>')}")
+        # A paused, retired platform task may intentionally have no schedule.
+        if task.get("status") == "ACTIVE" and (not isinstance(schedule, dict) or not schedule.get("cron")):
+            errors.append(f"active task missing schedule: {task.get('slug', '<unknown>')}")
     segments = data.get("platform_segments", {})
     for name, expected in (("claude_cloud", (18, 1)), ("chatgpt", (1, 0))):
         segment = segments.get(name) if isinstance(segments, dict) else None
