@@ -6,6 +6,7 @@ Never equates registration with successful execution. Does not sync schedules.
 from collections import Counter
 from pathlib import Path
 import argparse
+import re
 import datetime as dt
 import sys
 
@@ -14,7 +15,20 @@ import yaml
 
 def validate(path: Path) -> list[str]:
     errors = []
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw = path.read_text(encoding="utf-8")
+    # Public-mirror guard: reject historical credential extraction recipes and
+    # obvious hardcoded access tokens. This is only a focused static check.
+    forbidden = [
+        r"credential-osxkeychain\\s+get",
+        r"export\\s+(?:GH_)?TOKEN\\s*=",
+        r"ghp_[A-Za-z0-9]{20,}",
+        r"github_pat_[A-Za-z0-9_]{20,}",
+        r"AKIA[0-9A-Z]{16}",
+    ]
+    for pattern in forbidden:
+        if re.search(pattern, raw):
+            errors.append("public registry contains prohibited credential handling or token pattern")
+    data = yaml.safe_load(raw)
     if not isinstance(data, dict):
         return ["registry root is not a mapping"]
     if data.get("schema_version") != 1:
