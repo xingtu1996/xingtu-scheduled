@@ -18,14 +18,11 @@
 #       避免出现「正文改了 7 版、说明书还在 v2」的版本漂移。
 #
 #
-# 🔴 公开化红线（SAF-010 相关 · 2026-09-14 加）
-#   本文件的 prompt 正文含**内部项目名与业务代号**（某零售重构项目 / 某零售集团 / 某零售平台 / 某售前项目 / 内部协作系统 /
-#   含内部项目名与业务代号（已按类别泛化）、私人绝对路径与内部仓库名，禁原样公开。
-#   → 本文件**仅供本地私有 harness 使用，禁止同步进任何公开仓**。
-#   → 尤其注意 `github/xingtu-harness`（= github.com/xingtu1996/xingtu-harness，**公开仓**）：
-#     2026-09-14 实测其内**尚无** scheduled/automations 目录，请保持现状。
-#   → 若要开源这套 harness：必须先 desensitize（内部名换占位符），或只开源
-#     MIGRATION.md 的方法论部分（该文件不含内部名）。
+# 🔴 公开镜像安全边界（沿袭 SAF-010）
+#   本仓公开版本仅用于脱敏后的配置审计与移植示例；并非本地私有完整任务档案。
+#   严禁在公开镜像保存真实凭据、密钥读取命令、客户身份、个人会话原文和私有工作目录。
+#   旧版“禁止公开原文件”约束仍适用于本地私有原件，不代表当前公开镜像可以直接执行。
+#   执行时必须以本地受控的私有任务定义为准，经过审批才能使用真实权限。
 #
 # 首次留档：2026-09-14（全量 10 条）
 # ============================================================
@@ -340,7 +337,7 @@ automations:
       对行途技术 GitHub 开源矩阵（19 公开仓 + 5 私有仓）做每周健康度巡检，产出单文件 HTML 报告。这是矩阵目前唯一一道自动化防线——没有它，24 个仓全靠人工记得。
 
       【路径纪律】工作空间唯一根目录 `<WORKSPACE_ROOT>`。仓库本地副本在 `<WORKSPACE_ROOT>/github/*` 与 `<WORKSPACE_ROOT>/github/md2wechat/`。
-      【工具纪律】`gh` 实体在 `/opt/homebrew/bin/gh`（不在 PATH），需先 `export TOKEN=$(printf "protocol=https\nhost=github.com\n" | git credential-osxkeychain get | awk -F= '/^password/{print $2}')` 再 `GH_HOST=github.com GH_TOKEN="$TOKEN" /opt/homebrew/bin/gh ...`。**github.com 的 SSH 不通**，push 一律走 HTTPS 或 `tools/gh_push_api.py`（走 Contents API，自动跳过相同文件，用法 `python3 tools/gh_push_api.py <目录> <owner/repo> [--dry-run]`）。
+      【工具纪律】只使用已获用户授权的 GitHub CLI/应用凭据，凭据通过平台受控环境注入；禁止在任务提示词、日志、报告或公开 Registry 中记录提取钥匙串或导出令牌的命令。权限不足则报告并暂停，不绕过审批。
 
       【巡检项】
       1) **隐私复扫（最高优先级）**：`python3 tools/privacy_scan.py`（规则 15 条分级：🔴致命/🟠高危/🟡提示）。🔴 项必须当场修掉并 commit；修不了的写入报告「待 boss 拍板」。
@@ -797,3 +794,44 @@ automations:
       【规模告警】语料文件 <100 或 >2000、prompt <500、禁词剔除率 >30% → 置顶加粗告警。
       【隐私铁律 SAF-010】脚本内置白名单只扫 xingtu 会话源；禁止把雇主项目（内部代号类）会话内容写进任何产出；报告样本仅限脚本脱敏后的内容。
       【禁止动作】不自动创建/删除任何 skill（三张清单只供 boss 拍板）；不 push 任何公开仓。
+
+# ============================================================
+# 平台段补登（2026-11-02 同步 · 详见 docs/REGISTRY_SYNC_2026-11-02.md）
+# 本段只登记条目元数据（slug/排期/状态/主执行者/产物类别/失败凭证来源），
+# 不含任何 prompt 正文、私人路径与内部代号；本次同步未激活、暂停或修改任何任务。
+# ============================================================
+platform_segments:
+  claude_cloud:
+    platform: Muse 云端调度器
+    timezone: Asia/Shanghai
+    registered: "2026-11-02"
+    owner_rule: 每条 owner 即唯一主执行者
+    failure_evidence: Muse 云端调度器运行记录（逐条成功/失败状态可查）
+    tasks:
+      - {slug: daily-io-briefing, schedule: "每日 07:00", status: ACTIVE, owner: Muse, artifacts: "主聊早报交付"}
+      - {slug: daily-trend-digest, schedule: "每日 07:30", status: ACTIVE, owner: Muse, artifacts: "主聊趋势 digest 交付与底稿"}
+      - {slug: xingtu-podcast-daily, schedule: "每日约 08:17", status: ACTIVE, owner: Muse, artifacts: "私有播客存档（集数与完结状态可核验）"}
+      - {slug: weekly-free-tier-watch, schedule: "每周一 08:00", status: ACTIVE, owner: Muse, artifacts: "主聊免费政策简报"}
+      - {slug: github-backlog-watch, schedule: "每周一约 09:17", status: ACTIVE, owner: Muse, artifacts: "本地巡检基线与主聊推进清单"}
+      - {slug: github-daily-watch, schedule: "每日约 09:17", status: ACTIVE, owner: Muse, artifacts: "本地巡检日志与私有仓巡检日志（仅采集落盘，告警由 ChatGPT 统一负责）"}
+      - {slug: t5-series-check, schedule: "每周一 10:00", status: ACTIVE, owner: Muse, artifacts: "本地检查底稿"}
+      - {slug: tue-benchmark-watch, schedule: "每周二 10:00", status: ACTIVE, owner: Muse, artifacts: "本地监测底稿"}
+      - {slug: wed-repo-traffic, schedule: "每周三 10:00", status: ACTIVE, owner: Muse, artifacts: "本地巡检底稿"}
+      - {slug: thu-repurpose, schedule: "每周四 10:00", status: ACTIVE, owner: Muse, artifacts: "本地分发机会底稿"}
+      - {slug: fri-book-material, schedule: "每周五 16:00", status: ACTIVE, owner: Muse, artifacts: "本地出书素材底稿"}
+      - {slug: sat-creator-economy, schedule: "每周六 10:00", status: ACTIVE, owner: Muse, artifacts: "主聊创作者经济周报"}
+      - {slug: t13-weekly-report, schedule: "每周日 12:00", status: ACTIVE, owner: Muse, artifacts: "本地互动周报底稿"}
+      - {slug: t10-schedule-audit, schedule: "每周日 18:00", status: ACTIVE, owner: Muse, artifacts: "本地排期核对底稿"}
+      - {slug: t12-monthly-review, schedule: "每月 1 日 09:00", status: ACTIVE, owner: Muse, artifacts: "本地月度复盘底稿"}
+      - {slug: repo-health-monthly, schedule: "每月 15 日 09:00", status: ACTIVE, owner: Muse, artifacts: "本地健康复检底稿（首跑 2026-11-15）"}
+      - {slug: t1-topic-harvest, schedule: "每日 21:00", status: ACTIVE, owner: Muse, artifacts: "主聊选题候选交付"}
+      - {slug: fde-casebook-watch, schedule: "每日 21:17", status: ACTIVE, owner: Muse, artifacts: "案例集入仓 PR（无新内容时静默）"}
+      - {slug: daily-personality-quiz, schedule: "每日（原排期）", status: PAUSED, owner: Muse, artifacts: "已暂停（2026-11-01），去留待 boss 决策"}
+  chatgpt:
+    platform: ChatGPT 远端监控
+    timezone: Asia/Shanghai
+    registered: "2026-11-02"
+    owner_rule: 只读监控与异常告警，不执行任何任务
+    failure_evidence: ChatGPT 侧监控运行与告警记录
+    tasks:
+      - {slug: chatgpt-monitor, schedule: "每日 08:30；周日同轮深度复盘", status: ACTIVE, owner: ChatGPT, artifacts: "异常提醒（正常静默）"}

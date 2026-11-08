@@ -1,0 +1,30 @@
+name: Public registry validation
+
+on:
+  pull_request:
+    paths:
+      - 'registry/AUTOMATIONS.yaml'
+      - 'tools/validate_registry.py'
+      - '.github/workflows/registry-validation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'registry/AUTOMATIONS.yaml'
+      - 'tools/validate_registry.py'
+      - '.github/workflows/registry-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install PyYAML==6.0.2
+      - name: Validate registration schema (not runtime status)
+        run: python tools/validate_registry.py
