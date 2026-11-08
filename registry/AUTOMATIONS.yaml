@@ -18,14 +18,11 @@
 #       避免出现「正文改了 7 版、说明书还在 v2」的版本漂移。
 #
 #
-# 🔴 公开化红线（SAF-010 相关 · 2026-09-14 加）
-#   本文件的 prompt 正文含**内部项目名与业务代号**（某零售重构项目 / 某零售集团 / 某零售平台 / 某售前项目 / 内部协作系统 /
-#   含内部项目名与业务代号（已按类别泛化）、私人绝对路径与内部仓库名，禁原样公开。
-#   → 本文件**仅供本地私有 harness 使用，禁止同步进任何公开仓**。
-#   → 尤其注意 `github/xingtu-harness`（= github.com/xingtu1996/xingtu-harness，**公开仓**）：
-#     2026-09-14 实测其内**尚无** scheduled/automations 目录，请保持现状。
-#   → 若要开源这套 harness：必须先 desensitize（内部名换占位符），或只开源
-#     MIGRATION.md 的方法论部分（该文件不含内部名）。
+# 🔴 公开镜像安全边界（沿袭 SAF-010）
+#   本仓公开版本仅用于脱敏后的配置审计与移植示例；并非本地私有完整任务档案。
+#   严禁在公开镜像保存真实凭据、密钥读取命令、客户身份、个人会话原文和私有工作目录。
+#   旧版“禁止公开原文件”约束仍适用于本地私有原件，不代表当前公开镜像可以直接执行。
+#   执行时必须以本地受控的私有任务定义为准，经过审批才能使用真实权限。
 #
 # 首次留档：2026-09-14（全量 10 条）
 # ============================================================
@@ -340,7 +337,7 @@ automations:
       对行途技术 GitHub 开源矩阵（19 公开仓 + 5 私有仓）做每周健康度巡检，产出单文件 HTML 报告。这是矩阵目前唯一一道自动化防线——没有它，24 个仓全靠人工记得。
 
       【路径纪律】工作空间唯一根目录 `<WORKSPACE_ROOT>`。仓库本地副本在 `<WORKSPACE_ROOT>/github/*` 与 `<WORKSPACE_ROOT>/github/md2wechat/`。
-      【工具纪律】`gh` 实体在 `/opt/homebrew/bin/gh`（不在 PATH），需先 `export TOKEN=$(printf "protocol=https\nhost=github.com\n" | git credential-osxkeychain get | awk -F= '/^password/{print $2}')` 再 `GH_HOST=github.com GH_TOKEN="$TOKEN" /opt/homebrew/bin/gh ...`。**github.com 的 SSH 不通**，push 一律走 HTTPS 或 `tools/gh_push_api.py`（走 Contents API，自动跳过相同文件，用法 `python3 tools/gh_push_api.py <目录> <owner/repo> [--dry-run]`）。
+      【工具纪律】只使用已获用户授权的 GitHub CLI/应用凭据，凭据通过平台受控环境注入；禁止在任务提示词、日志、报告或公开 Registry 中记录提取钥匙串或导出令牌的命令。权限不足则报告并暂停，不绕过审批。
 
       【巡检项】
       1) **隐私复扫（最高优先级）**：`python3 tools/privacy_scan.py`（规则 15 条分级：🔴致命/🟠高危/🟡提示）。🔴 项必须当场修掉并 commit；修不了的写入报告「待 boss 拍板」。
